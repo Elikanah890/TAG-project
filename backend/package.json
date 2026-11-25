@@ -18,7 +18,7 @@
     "restart": "npm run stop && npm run start",
     "prestart:dev": "bash scripts/stop-backend.sh",
     "predev": "bash scripts/stop-backend.sh",
-    "prisma:seed:demo": "tsx scripts/seed-demo-users.ts",
+    "prisma:seed:demo": "node dist/scripts/seed-demo-users.js",
     "start:render": "bash scripts/render-start.sh"
   },
   "license": "ISC",
@@ -32,16 +32,18 @@
     "@nestjs/platform-express": "^11.1.6",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "@types/pdfkit": "^0.17.7",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "dotenv": "^17.4.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pdfkit": "^0.20.2",
     "pg": "^8.16.3",
+    "prisma": "^7.10.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2",
-    "@types/pdfkit": "^0.17.7"
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -49,7 +51,6 @@
     "@types/multer": "^2.3.0",
     "@types/node": "^22.15.30",
     "@types/passport-jwt": "^4.0.1",
-    "prisma": "^7.10.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.20.3",
