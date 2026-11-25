@@ -1,1 +1,1 @@
-ALTER TABLE "Invoice" ADD COLUMN "title" TEXT;
+ALTER TABLE "Invoice" ADD COLUMN IF NOT EXISTS "title" TEXT;

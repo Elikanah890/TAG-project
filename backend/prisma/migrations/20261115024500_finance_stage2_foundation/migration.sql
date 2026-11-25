@@ -38,7 +38,7 @@ END $$;
 ALTER TABLE "Budget" ADD COLUMN IF NOT EXISTS "campaignId" TEXT;
 
 -- AlterTable
-ALTER TABLE "Contribution" ADD COLUMN     "campaignId" TEXT,
+ALTER TABLE "Contribution" ADD COLUMN IF NOT EXISTS "campaignId" TEXT,
 ADD COLUMN IF NOT EXISTS "financialAccountId" TEXT,
 ADD COLUMN IF NOT EXISTS "invoiceId" TEXT;
 

@@ -1,10 +1,10 @@
 -- AlterTable
-ALTER TABLE "Member" ADD COLUMN "whatsappNumber" TEXT;
+ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "whatsappNumber" TEXT;
 
 -- AlterTable
-ALTER TABLE "Invoice" ADD COLUMN "recipientWhatsapp" TEXT;
-ALTER TABLE "Invoice" ADD COLUMN "category" TEXT;
-ALTER TABLE "Invoice" ADD COLUMN "paymentInstructions" TEXT;
+ALTER TABLE "Invoice" ADD COLUMN IF NOT EXISTS "recipientWhatsapp" TEXT;
+ALTER TABLE "Invoice" ADD COLUMN IF NOT EXISTS "category" TEXT;
+ALTER TABLE "Invoice" ADD COLUMN IF NOT EXISTS "paymentInstructions" TEXT;
 
 -- CreateIndex
-CREATE INDEX "Member_whatsappNumber_idx" ON "Member"("whatsappNumber");
+CREATE INDEX IF NOT EXISTS "Member_whatsappNumber_idx" ON "Member"("whatsappNumber");

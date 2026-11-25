@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "Testimonial" (
+CREATE TABLE IF NOT EXISTS "Testimonial" (
     "id" TEXT NOT NULL,
     "authorName" TEXT NOT NULL,
     "role" TEXT,
@@ -14,7 +14,7 @@ CREATE TABLE "Testimonial" (
 );
 
 -- CreateTable
-CREATE TABLE "MemberRequest" (
+CREATE TABLE IF NOT EXISTS "MemberRequest" (
     "id" TEXT NOT NULL,
     "memberId" TEXT NOT NULL,
     "subject" TEXT NOT NULL,
@@ -28,11 +28,14 @@ CREATE TABLE "MemberRequest" (
 );
 
 -- CreateIndex
-CREATE INDEX "MemberRequest_memberId_idx" ON "MemberRequest"("memberId");
+CREATE INDEX IF NOT EXISTS "MemberRequest_memberId_idx" ON "MemberRequest"("memberId");
 
 -- CreateIndex
-CREATE INDEX "MemberRequest_status_idx" ON "MemberRequest"("status");
+CREATE INDEX IF NOT EXISTS "MemberRequest_status_idx" ON "MemberRequest"("status");
 
 -- AddForeignKey
-ALTER TABLE "MemberRequest" ADD CONSTRAINT "MemberRequest_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "MemberRequest" ADD CONSTRAINT "MemberRequest_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 

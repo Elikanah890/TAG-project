@@ -17,14 +17,31 @@ const users = [
 
 async function main() {
   await seedRbac(prisma);
+
+  // Only bootstrap demo accounts on an empty database, or when explicitly
+  // requested. This keeps restarts from recreating accounts an administrator
+  // may have deliberately removed.
+  const userCount = await prisma.user.count();
+  if (userCount > 0 && process.env.SEED_DEMO_USERS !== 'true') {
+    console.log(`Skipping demo account seed: ${userCount} user(s) already exist`);
+    return;
+  }
+
   for (const u of users) {
     const role = await prisma.role.upsert({ where: { name: u.role }, update: {}, create: { name: u.role } });
-    const passwordHash = await bcrypt.hash(u.password, 10);
-    const user = await prisma.user.upsert({
-      where: { email: u.email },
-      update: { passwordHash, status: UserStatus.ACTIVE, mustChangePassword: false },
-      create: { email: u.email, passwordHash, status: UserStatus.ACTIVE, mustChangePassword: false },
-    });
+    const existing = await prisma.user.findUnique({ where: { email: u.email } });
+    // Only set the password when the account is first created. Re-running the
+    // seed must never overwrite a password the user has since changed.
+    const user = existing
+      ? existing
+      : await prisma.user.create({
+          data: {
+            email: u.email,
+            passwordHash: await bcrypt.hash(u.password, 10),
+            status: UserStatus.ACTIVE,
+            mustChangePassword: false,
+          },
+        });
     await prisma.userRole.upsert({
       where: { userId_roleId: { userId: user.id, roleId: role.id } },
       update: {},
