@@ -19,7 +19,7 @@
     "prestart:dev": "bash scripts/stop-backend.sh",
     "predev": "bash scripts/stop-backend.sh",
     "prisma:seed:demo": "tsx scripts/seed-demo-users.ts",
-    "start:render": "npx prisma migrate deploy && npm run prisma:seed:demo && node dist/src/main.js"
+    "start:render": "bash scripts/render-start.sh"
   },
   "license": "ISC",
   "description": "TAG FOREST YA KWANZA backend",
