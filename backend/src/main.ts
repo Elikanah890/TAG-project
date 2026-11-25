@@ -11,14 +11,23 @@ async function bootstrap() {
   const uploadsDir = process.env.UPLOADS_DIR || join(process.cwd(), 'uploads');
   mkdirSync(uploadsDir, { recursive: true });
   app.useStaticAssets(uploadsDir, { prefix: '/uploads/', index: false, dotfiles: 'deny' });
+  const normalizeOrigin = (value: string) => value.trim().replace(/\/+$/, '').toLowerCase();
   const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
     .split(',')
-    .map((o) => o.trim())
+    .map(normalizeOrigin)
     .filter(Boolean);
+  // Opt-in: allow Vercel preview deployment URLs (e.g. my-app-git-branch-team.vercel.app).
+  const allowVercelPreviews = process.env.CORS_ALLOW_VERCEL_PREVIEWS === 'true';
   app.enableCors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error('Origin not allowed by CORS'));
+      if (!origin) return callback(null, true);
+      const normalized = normalizeOrigin(origin);
+      if (allowedOrigins.includes(normalized)) return callback(null, true);
+      if (allowVercelPreviews && /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(normalized)) {
+        return callback(null, true);
+      }
+      console.error(`[CORS] Blocked origin: ${origin}`);
+      return callback(new Error(`Origin not allowed by CORS: ${origin}`));
     },
     credentials: false,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
