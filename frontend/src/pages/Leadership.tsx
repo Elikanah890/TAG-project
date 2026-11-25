@@ -76,8 +76,9 @@ const LeadershipPage = () => {
   const content = (page?.content || {}) as any;
 
   const fallbackPastors = leadershipTeam.slice(0, 2).map((p) => ({ id: String(p.id), name: p.name, title: p.role[lang], bio: p.bio[lang], imageUrl: p.image, phone: churchConfig.contact.phone, email: churchConfig.contact.email }));
-  const cmsPastors = (cmsLeaders || []).filter((l) => !l.ministry || /pastor|senior|assistant|mchungaji/i.test(`${l.title} ${l.ministry || ''}`));
-  const pastors = (cmsPastors.length > 0 ? cmsPastors : (cmsLeaders && cmsLeaders.length > 0 ? cmsLeaders.slice(0, 2) : fallbackPastors)).map((l: any) => ({
+  // Public Leadership page: CHURCH leaders only (no ministry). Ministry leaders appear on Ministries page.
+  const churchLeaders = (cmsLeaders || []).filter((l) => !l.ministry);
+  const pastors = (churchLeaders.length > 0 ? churchLeaders : fallbackPastors).map((l: any) => ({
     id: l.id,
     name: l.name,
     title: l.title || l.role?.[lang] || '',

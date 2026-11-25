@@ -71,9 +71,10 @@ import FinanceReconciliationPage from "./pages/admin/finance/FinanceReconciliati
 import FinanceAuditTrailPage from "./pages/admin/finance/FinanceAuditTrailPage";
 import FinanceSettingsPage from "./pages/admin/finance/FinanceSettingsPage";
 import CmsDashboard from "./pages/cms/CmsDashboard";
-import LeadersCms from "./pages/admin/cms/LeadersCms";
+import ChurchLeadershipCms from "./pages/admin/cms/ChurchLeadershipCms";
 import HomepageCms from "./pages/admin/cms/HomepageCms";
 import MinistriesCms from "./pages/admin/cms/MinistriesCms";
+import MinistryLeadersCms from "./pages/admin/cms/MinistryLeadersCms";
 import MediaCms from "./pages/admin/cms/MediaCms";
 import NewsCms from "./pages/admin/cms/NewsCms";
 import SermonsCms from "./pages/admin/cms/SermonsCms";
@@ -242,8 +243,9 @@ const App = () => (
               <Route path="dashboard" element={<CmsDashboard />} />
               <Route path="homepage" element={<HomepageCms />} />
               <Route path="about" element={<AboutCms />} />
-              <Route path="leadership" element={<LeadersCms />} />
+              <Route path="leadership" element={<ChurchLeadershipCms />} />
               <Route path="ministries" element={<MinistriesCms />} />
+              <Route path="ministry-leaders" element={<MinistryLeadersCms />} />
               <Route path="schedule" element={<ScheduleCms />} />
               <Route path="sermons" element={<SermonsCms />} />
               <Route path="events" element={<EventsCms />} />
