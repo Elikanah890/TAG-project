@@ -24,25 +24,25 @@ async function main() {
   const adminEmail = process.env.BOOTSTRAP_ADMIN_EMAIL;
   const adminPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD;
 
-  if (!adminEmail || !adminPassword) {
-    throw new Error('BOOTSTRAP_ADMIN_EMAIL and BOOTSTRAP_ADMIN_PASSWORD must be set to seed the system administrator');
+  if (adminEmail && adminPassword) {
+    const passwordHash = await bcrypt.hash(adminPassword, 10);
+    const systemAdminRole = await prisma.role.findUnique({ where: { name: 'SYSTEM_ADMIN' } });
+    if (!systemAdminRole) throw new Error('SYSTEM_ADMIN role is missing');
+
+    const admin = await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: { passwordHash, status: UserStatus.ACTIVE },
+      create: { email: adminEmail, passwordHash, status: UserStatus.ACTIVE },
+    });
+    await prisma.userRole.upsert({
+      where: { userId_roleId: { userId: admin.id, roleId: systemAdminRole.id } },
+      update: {},
+      create: { userId: admin.id, roleId: systemAdminRole.id },
+    });
+    console.log(`Bootstrap system administrator ensured: ${adminEmail}`);
+  } else {
+    console.warn('BOOTSTRAP_ADMIN_EMAIL/BOOTSTRAP_ADMIN_PASSWORD not set; skipping bootstrap admin seed');
   }
-
-  const passwordHash = await bcrypt.hash(adminPassword, 10);
-  const systemAdminRole = await prisma.role.findUnique({ where: { name: 'SYSTEM_ADMIN' } });
-  if (!systemAdminRole) throw new Error('SYSTEM_ADMIN role is missing');
-
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: { passwordHash, status: UserStatus.ACTIVE },
-    create: { email: adminEmail, passwordHash, status: UserStatus.ACTIVE },
-  });
-  await prisma.userRole.upsert({
-    where: { userId_roleId: { userId: admin.id, roleId: systemAdminRole.id } },
-    update: {},
-    create: { userId: admin.id, roleId: systemAdminRole.id },
-  });
-  console.log(`Bootstrap system administrator ensured: ${adminEmail}`);
 
   const defaults = [
     { key: 'nav_home_label', value: '', description: 'Override home nav label (optional)' },

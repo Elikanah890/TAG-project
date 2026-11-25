@@ -23,7 +23,7 @@ deploy_migrations() {
     return 0
   fi
   echo "[render-start] migrate deploy still failing; resetting DB (destructive) for clean initial deploy"
-  npx prisma migrate reset --force --skip-seed
+  npx prisma migrate reset --force
   npx prisma migrate deploy
 }
 
