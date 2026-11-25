@@ -20,7 +20,6 @@ import News from "./pages/News";
 import Giving from "./pages/Giving";
 import Contact from "./pages/Contact";
 import Testimonials from "./pages/Testimonials";
-import SermonsPage from "./pages/Sermons";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -77,7 +76,6 @@ import MinistriesCms from "./pages/admin/cms/MinistriesCms";
 import MinistryLeadersCms from "./pages/admin/cms/MinistryLeadersCms";
 import MediaCms from "./pages/admin/cms/MediaCms";
 import NewsCms from "./pages/admin/cms/NewsCms";
-import SermonsCms from "./pages/admin/cms/SermonsCms";
 import EventsCms from "./pages/admin/cms/EventsCms";
 import TestimonialsCms from "./pages/admin/cms/TestimonialsCms";
 import AboutCms from "./pages/admin/cms/AboutCms";
@@ -129,7 +127,6 @@ const App = () => (
             <Route path="/giving" element={<Giving />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/sermons" element={<SermonsPage />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/access-denied" element={<AccessDenied />} />
@@ -247,7 +244,6 @@ const App = () => (
               <Route path="ministries" element={<MinistriesCms />} />
               <Route path="ministry-leaders" element={<MinistryLeadersCms />} />
               <Route path="schedule" element={<ScheduleCms />} />
-              <Route path="sermons" element={<SermonsCms />} />
               <Route path="events" element={<EventsCms />} />
               <Route path="news" element={<NewsCms />} />
               <Route path="testimonials" element={<TestimonialsCms />} />

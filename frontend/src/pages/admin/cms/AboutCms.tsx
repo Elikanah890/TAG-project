@@ -9,6 +9,10 @@ import { PageHeader, SectionCard, LoadingBlock, ErrorBlock } from '@/components/
 import { Save } from 'lucide-react';
 
 const DEFAULT = {
+  titleEn: 'About Us',
+  titleSw: 'Kuhusu Sisi',
+  subtitleEn: 'Who we are as a church family in Mbeya City, Tanzania.',
+  subtitleSw: 'Sisi ni familia ya kanisa katika Jiji la Mbeya, Tanzania.',
   historyEn: 'TAG Forest Ya Kwanza is a vibrant church family in Mbeya, Tanzania, committed to worship, discipleship, and community transformation.',
   historySw: 'TAG Forest Ya Kwanza ni familia ya kanisa yenye uhai jijini Mbeya, Tanzania, iliyojitoa katika ibada, ufuatiliaji, na mabadiliko ya jamii.',
   visionEn: 'To be a Christ-centered church transforming lives and communities.',
@@ -39,6 +43,14 @@ export default function AboutCms() {
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Website CMS" title="About Page" description="Manage public About page content. Existing public content is shown as defaults until you save." actions={<div className="flex gap-2"><Button variant="outline" onClick={() => save.mutate('DRAFT')} disabled={save.isPending}>Save Draft</Button><Button className="bg-[#7A1F2B] text-white hover:bg-[#651925]" onClick={() => save.mutate('PUBLISHED')} disabled={save.isPending}><Save className="mr-2 h-4 w-4" />Publish</Button></div>} />
+      <SectionCard title="Page Header" description="Title and subtitle shown at the top of the public About page.">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2"><label className="text-sm font-medium">Title (EN)</label><Input value={form.titleEn} onChange={(e) => set('titleEn', e.target.value)} /></div>
+          <div className="space-y-2"><label className="text-sm font-medium">Title (SW)</label><Input value={form.titleSw} onChange={(e) => set('titleSw', e.target.value)} /></div>
+          <div className="space-y-2"><label className="text-sm font-medium">Subtitle (EN)</label><Input value={form.subtitleEn} onChange={(e) => set('subtitleEn', e.target.value)} /></div>
+          <div className="space-y-2"><label className="text-sm font-medium">Subtitle (SW)</label><Input value={form.subtitleSw} onChange={(e) => set('subtitleSw', e.target.value)} /></div>
+        </div>
+      </SectionCard>
       <SectionCard title="History / About" description="Main about content shown on the public About page.">
         <div className="grid gap-4">
           <div className="space-y-2"><label className="text-sm font-medium">History (English)</label><Textarea value={form.historyEn} onChange={(e) => set('historyEn', e.target.value)} className="min-h-[120px]" /></div>

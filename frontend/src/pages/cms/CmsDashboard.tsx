@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { PageHeader, SectionCard, LoadingBlock, ErrorBlock } from '@/components/admin/access/AccessUI';
-import { Globe, Layout, FileText, Users, Building2, CalendarDays, Mic, CalendarCheck, Newspaper, Quote, HeartHandshake, Phone, Image, Settings } from 'lucide-react';
+import { Globe, Layout, FileText, Users, Building2, CalendarDays, CalendarCheck, Newspaper, Quote, HeartHandshake, Phone, Image, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +16,6 @@ export default function CmsDashboard() {
     { to: '/cms/leadership', label: 'Leadership', icon: Users, desc: 'Leaders & staff' },
     { to: '/cms/ministries', label: 'Ministries', icon: Building2, desc: 'Church departments' },
     { to: '/cms/schedule', label: 'Schedule', icon: CalendarDays, desc: 'Service times' },
-    { to: '/cms/sermons', label: 'Sermons', icon: Mic, desc: 'Messages & media' },
     { to: '/cms/events', label: 'Events', icon: CalendarCheck, desc: 'Upcoming events' },
     { to: '/cms/news', label: 'News', icon: Newspaper, desc: 'Announcements & news' },
     { to: '/cms/testimonials', label: 'Testimonials', icon: Quote, desc: 'Member testimonies' },

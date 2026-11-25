@@ -9,10 +9,23 @@ import { PageHeader, SectionCard, LoadingBlock, ErrorBlock } from '@/components/
 import { Save } from 'lucide-react';
 
 const FIELDS: Array<{ key: string; label: string; type?: 'textarea'; section: string }> = [
+  { section: 'Navigation', key: 'nav_home_label', label: 'Home Label' },
+  { section: 'Navigation', key: 'nav_about_label', label: 'About Label' },
+  { section: 'Navigation', key: 'nav_leadership_label', label: 'Leadership Label' },
+  { section: 'Navigation', key: 'nav_ministries_label', label: 'Ministries Label' },
+  { section: 'Navigation', key: 'nav_schedule_label', label: 'Schedule Label' },
+  { section: 'Navigation', key: 'nav_news_label', label: 'News Label' },
+  { section: 'Navigation', key: 'nav_giving_label', label: 'Giving Label' },
+  { section: 'Navigation', key: 'nav_contact_label', label: 'Contact Label' },
+  { section: 'Navigation', key: 'nav_testimonials_label', label: 'Testimonials Label' },
+  { section: 'Navigation', key: 'nav_register_label', label: 'Register Button Label' },
+  { section: 'Navigation', key: 'nav_login_label', label: 'Login Button Label' },
+  { section: 'Navigation', key: 'nav_give_label', label: 'Give Now Button Label' },
   { section: 'Church Identity', key: 'church_name', label: 'Church Name' },
   { section: 'Church Identity', key: 'church_short_name', label: 'Short Name' },
   { section: 'Church Identity', key: 'church_tagline_en', label: 'Tagline (English)' },
   { section: 'Church Identity', key: 'church_tagline_sw', label: 'Tagline (Swahili)' },
+  { section: 'Church Identity', key: 'church_logo_url', label: 'Logo URL (navbar/footer)' },
   { section: 'Contact', key: 'contact_phone', label: 'Phone' },
   { section: 'Contact', key: 'contact_phone_display', label: 'Phone Display' },
   { section: 'Contact', key: 'contact_email', label: 'Email' },
@@ -45,6 +58,7 @@ const FIELDS: Array<{ key: string; label: string; type?: 'textarea'; section: st
   { section: 'Homepage', key: 'home_values_json', label: 'Home Values JSON (array of {icon,titleEn,titleSw,descEn,descSw})', type: 'textarea' },
   { section: 'Footer', key: 'footer_description_en', label: 'Footer Description (English)', type: 'textarea' },
   { section: 'Footer', key: 'footer_description_sw', label: 'Footer Description (Swahili)', type: 'textarea' },
+  { section: 'Footer', key: 'footer_copyright_text', label: 'Footer Copyright Text' },
 ];
 
 export default function SiteSettingsCms() {

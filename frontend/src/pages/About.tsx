@@ -21,6 +21,13 @@ const AboutPage = () => {
   const historyText = lang === 'en' ? (cms.historyEn || t('about.historyText')) : (cms.historySw || t('about.historyText'));
   const visionText = lang === 'en' ? (cms.visionEn || t('about.visionText')) : (cms.visionSw || t('about.visionText'));
   const missionText = lang === 'en' ? (cms.missionEn || t('about.missionText')) : (cms.missionSw || t('about.missionText'));
+  const aboutTitle = lang === 'en' ? (cms.titleEn || t('about.title')) : (cms.titleSw || t('about.title'));
+  const aboutSubtitle =
+    lang === 'en'
+      ? (cms.subtitleEn || 'Who we are as a church family in Mbeya City, Tanzania.')
+      : (cms.subtitleSw || 'Sisi ni familia ya kanisa katika Jiji la Mbeya, Tanzania.');
+  const valuesText = lang === 'en' ? (cms.valuesEn || '') : (cms.valuesSw || cms.valuesEn || '');
+  const values = valuesText.split(',').map((value: string) => value.trim()).filter(Boolean);
 
   // --- FULL STATEMENT OF FAITH TEXT ---
   const defaultStatementOfFaith = {
@@ -154,10 +161,8 @@ Mungu atatupa mbingu mpya na nchi mpya ambapo haki inaishi.
     <Layout>
       <PageHeader
         label={t('about.subtitle')}
-        title={t('about.title')}
-        subtitle={lang === 'en'
-          ? 'Who we are as a church family in Mbeya City, Tanzania.'
-          : 'Sisi ni familia ya kanisa katika Jiji la Mbeya, Tanzania.'}
+        title={aboutTitle}
+        subtitle={aboutSubtitle}
       />
 
       {/* History Section */}
@@ -234,6 +239,15 @@ Mungu atatupa mbingu mpya na nchi mpya ambapo haki inaishi.
               </p>
             </motion.div>
           </div>
+          {values.length > 0 && (
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
+              {values.map((value: string) => (
+                <span key={value} className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-black/70">
+                  {value}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

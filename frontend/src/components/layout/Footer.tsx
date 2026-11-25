@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import api from '@/lib/api';
 import { 
   Phone, 
   Mail, 
@@ -26,27 +28,48 @@ const TikTokIcon = () => (
 const Footer = () => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as 'en' | 'sw';
+  const { data: settings = {} } = useQuery({
+    queryKey: ['site-settings-public'],
+    queryFn: async () => (await api.get('/site-settings/public')).data,
+    staleTime: 30_000,
+    retry: false,
+  });
+  const churchName = settings.church_name || churchConfig.name;
+  const logoUrl = settings.church_logo_url || '/logos/logo.png';
+  const tagline =
+    (lang === 'sw' ? settings.church_tagline_sw : settings.church_tagline_en) ||
+    churchConfig.tagline[lang];
+  const footerDescription =
+    (lang === 'sw' ? settings.footer_description_sw : settings.footer_description_en) || tagline;
+  const phone = settings.contact_phone || churchConfig.contact.phone;
+  const phoneDisplay = settings.contact_phone_display || churchConfig.contact.phoneDisplay;
+  const email = settings.contact_email || churchConfig.contact.email;
+  const address =
+    (lang === 'sw' ? settings.contact_address_sw : settings.contact_address_en) ||
+    (lang === 'en' ? churchConfig.location.address : churchConfig.location.addressSw);
+  const copyright =
+    settings.footer_copyright_text ||
+    `© ${new Date().getFullYear()} ${churchName}. ${t('footer.rights')}`;
 
   const quickLinks = [
-    { path: '/about', label: t('nav.about') },
-    { path: '/ministries', label: t('nav.ministries') },
-    { path: '/sermons', label: lang === 'sw' ? 'Mahubiri' : 'Sermons' },
-    { path: '/giving', label: t('nav.giving') },
-    { path: '/contact', label: t('nav.contact') },
+    { path: '/about', label: settings.nav_about_label || t('nav.about') },
+    { path: '/ministries', label: settings.nav_ministries_label || t('nav.ministries') },
+    { path: '/giving', label: settings.nav_giving_label || t('nav.giving') },
+    { path: '/contact', label: settings.nav_contact_label || t('nav.contact') },
   ];
 
   const connectLinks = [
-    { path: '/testimonials', label: t('nav.testimonials') },
-    { path: '/schedule', label: t('nav.schedule') },
+    { path: '/testimonials', label: settings.nav_testimonials_label || t('nav.testimonials') },
+    { path: '/schedule', label: settings.nav_schedule_label || t('nav.schedule') },
   ];
 
   const socialLinks = [
-    { href: churchConfig.social.whatsapp, icon: WhatsAppIcon, label: 'WhatsApp' },
-    { href: churchConfig.social.youtube, icon: Youtube, label: 'YouTube' },
-    { href: churchConfig.social.instagram, icon: Instagram, label: 'Instagram' },
-    { href: churchConfig.social.facebook, icon: Facebook, label: 'Facebook' },
-    { href: churchConfig.social.tiktok, icon: TikTokIcon, label: 'TikTok' },
-  ];
+    { href: settings.social_whatsapp || churchConfig.social.whatsapp, icon: WhatsAppIcon, label: 'WhatsApp' },
+    { href: settings.social_youtube || churchConfig.social.youtube, icon: Youtube, label: 'YouTube' },
+    { href: settings.social_instagram || churchConfig.social.instagram, icon: Instagram, label: 'Instagram' },
+    { href: settings.social_facebook || churchConfig.social.facebook, icon: Facebook, label: 'Facebook' },
+    { href: settings.social_tiktok || churchConfig.social.tiktok, icon: TikTokIcon, label: 'TikTok' },
+  ].filter((social) => Boolean(social.href));
 
   return (
     <footer className="bg-black text-white">
@@ -57,36 +80,36 @@ const Footer = () => {
             <Link to="/" className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center">
                 <img
-                  src="/logos/logo.png"
-                  alt="Church Logo"
+                  src={logoUrl}
+                  alt={`${churchName} logo`}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-lg">{churchConfig.name}</h3>
+                <h3 className="font-serif font-bold text-lg">{churchName}</h3>
               </div>
             </Link>
             <p className="text-white/80 mb-6">
-              {churchConfig.tagline[lang]}
+              {footerDescription}
             </p>
             <div className="space-y-3">
               <a 
-                href={`tel:${churchConfig.contact.phone}`}
+                href={`tel:${phone}`}
                 className="flex items-center gap-3 text-white/80 hover:text-[#FFD600] transition-colors"
               >
                 <Phone className="w-4 h-4" />
-                <span>{churchConfig.contact.phoneDisplay}</span>
+                <span>{phoneDisplay}</span>
               </a>
               <a 
-                href={`mailto:${churchConfig.contact.email}`}
+                href={`mailto:${email}`}
                 className="flex items-center gap-3 text-white/80 hover:text-[#FFD600] transition-colors"
               >
                 <Mail className="w-4 h-4" />
-                <span>{churchConfig.contact.email}</span>
+                <span>{email}</span>
               </a>
               <div className="flex items-start gap-3 text-white/80">
                 <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                <span>{lang === 'en' ? churchConfig.location.address : churchConfig.location.addressSw}</span>
+                <span>{address}</span>
               </div>
             </div>
           </div>
@@ -99,7 +122,7 @@ const Footer = () => {
                 <li key={link.path}>
                   <Link 
                     to={link.path}
-                    className="text-white/80 hover:text-black transition-colors"
+                    className="text-white/80 hover:text-[#FFD600] transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -116,7 +139,7 @@ const Footer = () => {
                 <li key={link.path}>
                   <Link 
                     to={link.path}
-                    className="text-white/80 hover:text-black transition-colors"
+                    className="text-white/80 hover:text-[#FFD600] transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -146,7 +169,7 @@ const Footer = () => {
       <div className="border-t border-black/10">
         <div className="container-church py-6">
           <p className="text-center text-white/70 text-sm">
-            © {new Date().getFullYear()} {churchConfig.name}. {t('footer.rights')}
+            {copyright}
           </p>
         </div>
       </div>

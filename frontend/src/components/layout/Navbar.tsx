@@ -41,22 +41,26 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/', label: siteSettings.nav_home_label || t('nav.home') },
-    { path: '/about', label: t('nav.about') },
-    { path: '/leadership', label: t('nav.leadership') },
-    { path: '/ministries', label: t('nav.ministries') },
-    { path: '/schedule', label: t('nav.schedule') },
-    { path: '/news', label: t('nav.news') },
-    { path: '/giving', label: t('nav.giving') },
-    { path: '/contact', label: t('nav.contact') },
+    { path: '/about', label: siteSettings.nav_about_label || t('nav.about') },
+    { path: '/leadership', label: siteSettings.nav_leadership_label || t('nav.leadership') },
+    { path: '/ministries', label: siteSettings.nav_ministries_label || t('nav.ministries') },
+    { path: '/schedule', label: siteSettings.nav_schedule_label || t('nav.schedule') },
+    { path: '/news', label: siteSettings.nav_news_label || t('nav.news') },
+    { path: '/giving', label: siteSettings.nav_giving_label || t('nav.giving') },
+    { path: '/contact', label: siteSettings.nav_contact_label || t('nav.contact') },
   ];
 
   const moreLinks = [
-    { path: '/sermons', label: i18n.language === 'sw' ? 'Mahubiri' : 'Sermons' },
-    { path: '/testimonials', label: t('nav.testimonials') },
-    { path: '/register', label: 'Register' },
+    { path: '/testimonials', label: siteSettings.nav_testimonials_label || t('nav.testimonials') },
+    { path: '/register', label: siteSettings.nav_register_label || 'Register' },
   ];
+  const loginLabel = siteSettings.nav_login_label || 'Login';
+  const registerLabel = siteSettings.nav_register_label || 'Register';
+  const giveLabel = siteSettings.nav_give_label || t('giving.giveNow');
 
-  const brandWords = churchConfig.shortName.split(' ');
+  const logoUrl = siteSettings.church_logo_url || '/logos/logo.png';
+  const brandName = siteSettings.church_short_name || siteSettings.church_name || churchConfig.shortName;
+  const brandWords = brandName.split(' ');
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -72,8 +76,8 @@ const Navbar = () => {
           <Link to="/" className="flex shrink-0 items-center gap-2">
             <div className="h-8 w-8 overflow-hidden rounded-full sm:h-9 sm:w-9 lg:h-10 lg:w-10">
               <img
-                src="/logos/logo.png"
-                alt="Church Logo"
+                src={logoUrl}
+                alt={siteSettings.church_name || 'Church Logo'}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -134,15 +138,15 @@ const Navbar = () => {
             </Button>
 
             <Link to="/login" className="hidden md:block">
-              <Button variant="ghost" size="sm" className="px-2 text-xs 2xl:text-sm">Login</Button>
+              <Button variant="ghost" size="sm" className="px-2 text-xs 2xl:text-sm">{loginLabel}</Button>
             </Link>
             <Link to="/register" className="hidden md:block">
-              <Button variant="outline" size="sm" className="whitespace-nowrap border-black/20 px-3 text-xs hover:bg-black hover:text-white 2xl:text-sm">Register</Button>
+              <Button variant="outline" size="sm" className="whitespace-nowrap border-black/20 px-3 text-xs hover:bg-black hover:text-white 2xl:text-sm">{registerLabel}</Button>
             </Link>
             {/* Give Button */}
             <Link to="/giving" className="hidden sm:block">
               <Button className="whitespace-nowrap rounded-lg bg-[#FFD600] px-4 text-xs font-semibold text-black shadow-sm hover:bg-[#E6C000] 2xl:text-sm">
-                {t('giving.giveNow')}
+                {giveLabel}
               </Button>
             </Link>
 
@@ -185,7 +189,7 @@ const Navbar = () => {
                 <div className="pt-4 px-4">
                   <Link to="/giving" onClick={() => setIsOpen(false)}>
                     <Button className="w-full rounded-lg bg-[#FFD600] font-semibold text-black hover:bg-[#E6C000]">
-                      {t('giving.giveNow')}
+                      {giveLabel}
                     </Button>
                   </Link>
                 </div>

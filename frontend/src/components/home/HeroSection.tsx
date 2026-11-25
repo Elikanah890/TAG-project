@@ -35,7 +35,8 @@ const FADE_S = 1.2;
 const TYPE_DONE = 4;
 
 const HeroSection = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as 'en' | 'sw';
   const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -49,6 +50,13 @@ const HeroSection = () => {
     const parsed = siteSettings.hero_images_json ? JSON.parse(siteSettings.hero_images_json) : [];
     if (Array.isArray(parsed) && parsed.filter(Boolean).length > 0) HERO_IMAGES = parsed.filter(Boolean);
   } catch {}
+
+  const titleLine1 = siteSettings.hero_title_line1 || 'T.A.G FOREST YA';
+  const titleLine2 = siteSettings.hero_title_line2 || 'KWANZA';
+  const heroSubtitle =
+    (lang === 'sw' ? siteSettings.hero_subtitle_sw : siteSettings.hero_subtitle_en) ||
+    t('hero.subtitle');
+  const watchUrl = siteSettings.hero_watch_url || siteSettings.social_youtube || churchConfig.social.youtube;
 
   // Sequential typewriter state machine: 0 = "Welcome to", 1 = "T.A.G FOREST YA",
   // 2 = "KWANZA", 3 = tagline, 4 = done (paragraph + CTAs fade in)
@@ -92,7 +100,7 @@ const HeroSection = () => {
     { icon: CalendarDays, label: t('home.quickSchedule'), to: '/schedule' },
     { icon: Users, label: t('home.quickMinistries'), to: '/ministries' },
     { icon: Heart, label: t('home.quickGiving'), to: '/giving' },
-    { icon: BookOpen, label: t('home.quickBible'), href: churchConfig.social.youtube },
+    { icon: BookOpen, label: t('home.quickBible'), href: watchUrl },
   ];
 
   return (
@@ -188,12 +196,12 @@ const HeroSection = () => {
             <h1 className="font-serif font-extrabold leading-[1.02] tracking-tight">
               <span className="block min-h-[1.02em] text-4xl text-white sm:text-5xl xl:text-6xl">
                 {reduceMotion || step > 1 ? (
-                  'T.A.G FOREST YA'
+                  titleLine1
                 ) : step === 1 ? (
                   <Typewriter
                     options={{ autoStart: false, loop: false, delay: 45, cursor: '|' }}
                     onInit={(tw) => {
-                      tw.typeString('T.A.G FOREST YA').callFunction(() => scheduleNext(2, 250)).start();
+                      tw.typeString(titleLine1).callFunction(() => scheduleNext(2, 250)).start();
                     }}
                   />
                 ) : (
@@ -202,12 +210,12 @@ const HeroSection = () => {
               </span>
               <span className="block min-h-[1.02em] text-6xl text-[#FFD600] sm:text-7xl xl:text-8xl">
                 {reduceMotion || step > 2 ? (
-                  'KWANZA'
+                  titleLine2
                 ) : step === 2 ? (
                   <Typewriter
                     options={{ autoStart: false, loop: false, delay: 45, cursor: '|' }}
                     onInit={(tw) => {
-                      tw.typeString('KWANZA').callFunction(() => scheduleNext(3, 600)).start();
+                      tw.typeString(titleLine2).callFunction(() => scheduleNext(3, 600)).start();
                     }}
                   />
                 ) : (
@@ -236,7 +244,7 @@ const HeroSection = () => {
             <div className="mt-4 max-w-lg">
               {(reduceMotion || done) && (
                 <motion.p {...reveal(0)} className="text-base leading-relaxed text-white/80 sm:text-lg">
-                  {t('hero.subtitle')}
+                  {heroSubtitle}
                 </motion.p>
               )}
             </div>
@@ -251,7 +259,7 @@ const HeroSection = () => {
                     </Button>
                   </Link>
                   <a
-                    href={churchConfig.social.youtube}
+                    href={watchUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-lg border-2 border-white bg-white px-7 py-3.5 font-semibold text-black transition hover:border-[#FFD600] hover:bg-[#FFD600]"

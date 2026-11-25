@@ -1,26 +1,142 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { PageHeader, SectionCard, LoadingBlock, ErrorBlock } from '@/components/admin/access/AccessUI';
+import { Save } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function HomepageCms(){
+type Field = { key: string; label: string; type?: 'textarea'; help?: string };
+
+const SECTIONS: Array<{ title: string; description: string; fields: Field[] }> = [
+  {
+    title: 'Hero',
+    description: 'Main banner shown at the top of the homepage.',
+    fields: [
+      { key: 'hero_welcome', label: 'Welcome Badge Text' },
+      { key: 'hero_title_line1', label: 'Headline Line 1', help: 'Default: T.A.G FOREST YA' },
+      { key: 'hero_title_line2', label: 'Headline Line 2', help: 'Default: KWANZA' },
+      { key: 'hero_tagline', label: 'Hero Tagline' },
+      { key: 'hero_subtitle_en', label: 'Hero Paragraph (English)', type: 'textarea' },
+      { key: 'hero_subtitle_sw', label: 'Hero Paragraph (Swahili)', type: 'textarea' },
+      { key: 'hero_watch_url', label: 'Watch Live / YouTube URL' },
+      {
+        key: 'hero_images_json',
+        label: 'Hero Images JSON',
+        type: 'textarea',
+        help: 'Array of image URLs, e.g. ["/hero/hero-1.jpg","/hero/hero-2.jpg"]',
+      },
+      { key: 'nav_home_label', label: 'Navbar Home Label' },
+    ],
+  },
+  {
+    title: 'About Preview',
+    description: 'Section shown below the values strip on the homepage.',
+    fields: [
+      { key: 'home_about_image', label: 'About Image URL' },
+      { key: 'home_about_stat_value', label: 'Stat Value', help: 'e.g. 900+' },
+      { key: 'home_about_stat_label_en', label: 'Stat Label (English)' },
+      { key: 'home_about_stat_label_sw', label: 'Stat Label (Swahili)' },
+    ],
+  },
+  {
+    title: 'Values Strip',
+    description: 'Four value cards shown under the hero.',
+    fields: [
+      {
+        key: 'home_values_json',
+        label: 'Values JSON',
+        type: 'textarea',
+        help: 'Array of {icon,titleEn,titleSw,descEn,descSw}. Icons: Cross, Shield, Users, HandHeart, Heart, BookOpen, Sparkles',
+      },
+    ],
+  },
+  {
+    title: 'Giving Banner',
+    description: 'Call-to-action banner near the bottom of the homepage.',
+    fields: [
+      { key: 'giving_banner_title_en', label: 'Title (English)' },
+      { key: 'giving_banner_title_sw', label: 'Title (Swahili)' },
+      { key: 'giving_banner_desc_en', label: 'Description (English)', type: 'textarea' },
+      { key: 'giving_banner_desc_sw', label: 'Description (Swahili)', type: 'textarea' },
+    ],
+  },
+];
+
+const ALL_KEYS = SECTIONS.flatMap((section) => section.fields.map((field) => field.key));
+
+export default function HomepageCms() {
   const qc = useQueryClient();
-  const { data: publicSettings={} } = useQuery({ queryKey:['site-settings-public'], queryFn: async()=> (await api.get('/site-settings/public')).data });
-  const [form,setForm]=useState<any>({ nav_home_label:'', hero_welcome:'', hero_tagline:'', hero_images_json:'' });
-  const filled = { nav_home_label: form.nav_home_label || publicSettings.nav_home_label || '', hero_welcome: form.hero_welcome || publicSettings.hero_welcome || '', hero_tagline: form.hero_tagline || publicSettings.hero_tagline || '', hero_images_json: form.hero_images_json || publicSettings.hero_images_json || '' };
-  const save = useMutation({ mutationFn: async()=> (await api.put('/site-settings/admin', filled)).data, onSuccess:()=>{toast.success('Homepage updated (audited)'); qc.invalidateQueries({queryKey:['site-settings-public']});}, onError:(e:any)=>toast.error(e?.response?.data?.message||'Failed') });
-  const publishHome = useMutation({ mutationFn: async()=> (await api.post('/cms/pages', { slug:'home', title:'Homepage', status:'PUBLISHED', content:{ hero: filled } })).data, onSuccess:()=>toast.success('Homepage page published'), onError:(e:any)=>toast.error(e?.response?.data?.message||'Failed') });
-  return <div className="space-y-4"><div><h1 className="font-serif text-3xl text-gray-800">Homepage Management</h1><p className="text-gray-500">Manage homepage/site hero content (points 26, 27). Changes are audited.</p></div>
-    <Card className="border-gray-100"><CardHeader><CardTitle>Homepage Content</CardTitle></CardHeader><CardContent className="space-y-3 max-w-2xl">
-      <div><label className="text-sm">Navbar Home Label</label><Input value={filled.nav_home_label} onChange={e=>setForm({...form,nav_home_label:e.target.value})}/></div>
-      <div><label className="text-sm">Hero Welcome Text</label><Input value={filled.hero_welcome} onChange={e=>setForm({...form,hero_welcome:e.target.value})}/></div>
-      <div><label className="text-sm">Hero Tagline</label><Input value={filled.hero_tagline} onChange={e=>setForm({...form,hero_tagline:e.target.value})}/></div>
-      <div><label className="text-sm">Hero Images JSON (array of URLs)</label><Input value={filled.hero_images_json} onChange={e=>setForm({...form,hero_images_json:e.target.value})} placeholder='["/hero/hero-1.jpg","/hero/hero-2.jpg"]'/></div>
-      <div className="flex gap-2"><Button className="bg-[#7A1F2B]" onClick={()=>save.mutate()}>Save Changes</Button><Button variant="outline" onClick={()=>publishHome.mutate()}>Publish Homepage Record</Button></div>
-      <div className="text-xs text-gray-500">Live public settings feed Navbar/Hero immediately via API.</div>
-    </CardContent></Card>
-  </div>;
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['site-settings-admin'],
+    queryFn: async () => (await api.get('/site-settings/admin')).data,
+  });
+  const [form, setForm] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!data) return;
+    const next: Record<string, string> = {};
+    for (const key of ALL_KEYS) next[key] = data[key] || '';
+    setForm(next);
+  }, [data]);
+
+  const save = useMutation({
+    mutationFn: async () => (await api.put('/site-settings/admin', form)).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['site-settings-admin'] });
+      qc.invalidateQueries({ queryKey: ['site-settings-public'] });
+      toast.success('Homepage content saved');
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.message || 'Failed to save homepage content'),
+  });
+
+  if (isLoading) return <LoadingBlock label="Loading homepage content..." />;
+  if (isError) return <ErrorBlock message={(error as any)?.response?.data?.message} onRetry={refetch} />;
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Website CMS"
+        title="Homepage"
+        description="Manage every editable section of the homepage. Changes appear on the public site immediately after saving."
+        actions={
+          <Button
+            className="bg-[#7A1F2B] text-white hover:bg-[#651925]"
+            onClick={() => save.mutate()}
+            disabled={save.isPending}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            {save.isPending ? 'Saving...' : 'Save Homepage'}
+          </Button>
+        }
+      />
+      {SECTIONS.map((section) => (
+        <SectionCard key={section.title} title={section.title} description={section.description}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {section.fields.map((field) => (
+              <div key={field.key} className={field.type === 'textarea' ? 'space-y-2 sm:col-span-2' : 'space-y-2'}>
+                <label className="text-sm font-medium text-gray-700">{field.label}</label>
+                {field.type === 'textarea' ? (
+                  <Textarea
+                    value={form[field.key] || ''}
+                    onChange={(e) => setForm((previous) => ({ ...previous, [field.key]: e.target.value }))}
+                    className="bg-white"
+                  />
+                ) : (
+                  <Input
+                    value={form[field.key] || ''}
+                    onChange={(e) => setForm((previous) => ({ ...previous, [field.key]: e.target.value }))}
+                    className="bg-white"
+                  />
+                )}
+                <p className="text-[11px] text-gray-400">{field.help || field.key}</p>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      ))}
+    </div>
+  );
 }
