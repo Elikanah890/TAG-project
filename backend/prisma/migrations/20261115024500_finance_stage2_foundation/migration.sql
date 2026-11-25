@@ -1,5 +1,5 @@
 -- CreateEnum
-DO $$ BEGIN DO $$ BEGIN
+DO $$ BEGIN
   CREATE TYPE "InvoiceStatus" AS ENUM ('DRAFT', 'ISSUED', 'SENT', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
