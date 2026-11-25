@@ -305,13 +305,15 @@ export class AccessManagementService {
     return { user: result };
   }
 
-  async resetPassword(id: string, actorId?: string) {
+  async resetPassword(id: string, dto: any = {}, actorId?: string) {
     const user = await this.getUserOrThrow(id);
-    const password = tempPassword();
-    await this.prisma.user.update({ where: { id }, data: { passwordHash: await bcrypt.hash(password, 10), mustChangePassword: true } });
+    const provided = dto?.password ? String(dto.password) : null;
+    if (provided) assertPasswordPolicy(provided);
+    const password = provided || tempPassword();
+    await this.prisma.user.update({ where: { id }, data: { passwordHash: await bcrypt.hash(password, 10), mustChangePassword: !provided } });
     await this.prisma.refreshToken.updateMany({ where: { userId: id, revokedAt: null }, data: { revokedAt: new Date(), revokedBy: actorId || null } });
-    await this.audit(actorId, 'USER_PASSWORD_RESET', 'User', id, { email: user.email, sessionsRevoked: true, mustChangePassword: true });
-    return { success: true, userId: id, email: user.email, temporaryPassword: password };
+    await this.audit(actorId, 'USER_PASSWORD_RESET', 'User', id, { email: user.email, sessionsRevoked: true, mustChangePassword: !provided, mode: provided ? 'SET_BY_ADMIN' : 'TEMPORARY' });
+    return { success: true, userId: id, email: user.email, temporaryPassword: provided ? undefined : password, passwordSet: !!provided };
   }
 
   async setStatus(id: string, status: string, actorId?: string) {

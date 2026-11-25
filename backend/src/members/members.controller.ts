@@ -45,9 +45,9 @@ export class MembersController {
     return this.membersService.reject(id, body?.reason, req.user?.userId);
   }
 
-  // Credential reset is administrative workflow (secretary) - overseer does not perform member ops
+  // Credential reset is administrative workflow. System admin can recover access for any member.
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleName.CHURCH_SECRETARY)
+  @Roles(RoleName.CHURCH_SECRETARY, RoleName.SYSTEM_ADMIN)
   @Post(':id/reset-password')
   resetPassword(@Param('id') id: string, @Req() req: any) {
     return this.membersService.resetPassword(id, req.user?.userId);

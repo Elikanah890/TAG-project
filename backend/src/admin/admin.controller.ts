@@ -64,8 +64,8 @@ export class AdminController {
 
   @RequirePermissions('users.reset_password')
   @Post('users/:id/reset-password')
-  resetPassword(@Param('id') id: string, @Req() req: any) {
-    return this.access.resetPassword(id, req.user?.userId);
+  resetPassword(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+    return this.access.resetPassword(id, body || {}, req.user?.userId);
   }
 
   @RequirePermissions('users.suspend')

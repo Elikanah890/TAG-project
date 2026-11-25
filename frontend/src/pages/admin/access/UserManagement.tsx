@@ -57,7 +57,9 @@ export default function UserManagement() {
   const [roleTarget, setRoleTarget] = useState<UserRow | null>(null);
   const [roleSelection, setRoleSelection] = useState<string[]>([]);
   const [roleReason, setRoleReason] = useState('');
-  const [resetInfo, setResetInfo] = useState<{ email: string; temporaryPassword: string } | null>(null);
+  const [resetInfo, setResetInfo] = useState<{ email: string; temporaryPassword?: string; passwordSet?: boolean } | null>(null);
+  const [resetTarget, setResetTarget] = useState<UserRow | null>(null);
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
   const [createOpen, setCreateOpen] = useState(params.get('new') === '1');
   const [editing, setEditing] = useState<UserRow | null>(null);
   const [form, setForm] = useState<any>({ email: '', phone: '', status: 'ACTIVE', roles: ['CHURCH_MEMBER'], password: '' });
@@ -120,8 +122,13 @@ export default function UserManagement() {
   });
 
   const resetPassword = useMutation({
-    mutationFn: async (id: string) => (await api.post(`/admin/users/${id}/reset-password`)).data,
-    onSuccess: (data: any) => { setResetInfo({ email: data.email, temporaryPassword: data.temporaryPassword }); toast.success('Password reset. Share the temporary password securely.'); invalidate(); },
+    mutationFn: async ({ id, password }: { id: string; password?: string }) => (await api.post(`/admin/users/${id}/reset-password`, password ? { password } : {})).data,
+    onSuccess: (data: any) => {
+      setResetInfo({ email: data.email, temporaryPassword: data.temporaryPassword, passwordSet: !!data.passwordSet });
+      setResetTarget(null); setResetPasswordValue('');
+      toast.success(data.passwordSet ? 'Password updated by administrator.' : 'Temporary password generated. Share it securely.');
+      invalidate();
+    },
     onError: (e: any) => toast.error(e?.response?.data?.message || 'Reset failed'),
   });
 
@@ -235,7 +242,7 @@ export default function UserManagement() {
                             <DropdownMenuItem onClick={() => setDetailId(u.id)}><Eye className="mr-2 h-4 w-4" />View details</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEdit(u)}><Pencil className="mr-2 h-4 w-4" />Edit account</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openRoles(u)} disabled={isSelf(u)}><ShieldCheck className="mr-2 h-4 w-4" />Assign roles</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => resetPassword.mutate(u.id)}><KeyRound className="mr-2 h-4 w-4" />Reset password</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { setResetTarget(u); setResetPasswordValue(''); }}><KeyRound className="mr-2 h-4 w-4" />Reset / Set password</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => revokeSessions.mutate(u.id)}><LogOut className="mr-2 h-4 w-4" />Revoke sessions</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {u.status === 'ACTIVE' ? (
@@ -331,18 +338,36 @@ export default function UserManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Temporary password */}
+      {/* Reset/set password */}
+      <Dialog open={!!resetTarget} onOpenChange={(o) => { if (!o) { setResetTarget(null); setResetPasswordValue(''); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Reset / Set password</DialogTitle><DialogDescription>{resetTarget?.email}. Leave blank to generate a temporary password, or enter a new password to set it directly.</DialogDescription></DialogHeader>
+          <div className="space-y-2">
+            <Label>New password (optional)</Label>
+            <Input type="password" autoComplete="new-password" value={resetPasswordValue} onChange={(e)=>setResetPasswordValue(e.target.value)} placeholder="Min 8 chars, upper + lower + number" />
+            <p className="text-xs text-gray-500">All active sessions will be revoked after reset.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setResetTarget(null); setResetPasswordValue(''); }}>Cancel</Button>
+            <Button className="bg-[#7A1F2B]" disabled={resetPassword.isPending || !resetTarget} onClick={() => resetTarget && resetPassword.mutate({ id: resetTarget.id, password: resetPasswordValue || undefined })}>{resetPassword.isPending ? 'Saving…' : (resetPasswordValue ? 'Set password' : 'Generate temporary')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password result */}
       <Dialog open={!!resetInfo} onOpenChange={(o) => !o && setResetInfo(null)}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Temporary password</DialogTitle><DialogDescription>Share this securely with {resetInfo?.email}. All existing sessions were revoked.</DialogDescription></DialogHeader>
-          <div className="rounded-lg border border-gray-100 bg-[#C9962B]/10 p-4">
-            <p className="text-xs uppercase tracking-wide text-[#A9771F]/70">Temporary password</p>
-            <div className="mt-2 flex items-center justify-between gap-2">
-              <code className="text-lg font-semibold text-gray-800">{resetInfo?.temporaryPassword}</code>
-              <Button size="sm" variant="outline" onClick={() => { navigator.clipboard?.writeText(resetInfo?.temporaryPassword || ''); toast.success('Copied'); }}><Copy className="h-4 w-4" /></Button>
+          <DialogHeader><DialogTitle>{resetInfo?.passwordSet ? 'Password updated' : 'Temporary password'}</DialogTitle><DialogDescription>{resetInfo?.email}. All existing sessions were revoked.</DialogDescription></DialogHeader>
+          {resetInfo?.temporaryPassword ? (
+            <div className="rounded-lg border border-gray-100 bg-[#C9962B]/10 p-4">
+              <p className="text-xs uppercase tracking-wide text-[#A9771F]/70">Temporary password</p>
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <code className="text-lg font-semibold text-gray-800">{resetInfo?.temporaryPassword}</code>
+                <Button size="sm" variant="outline" onClick={() => { navigator.clipboard?.writeText(resetInfo?.temporaryPassword || ''); toast.success('Copied'); }}><Copy className="h-4 w-4" /></Button>
+              </div>
+              <p className="mt-2 text-xs text-gray-500">User should change this password after signing in.</p>
             </div>
-          </div>
-          <p className="text-xs text-gray-500">The user should change this password after signing in.</p>
+          ) : <p className="text-sm text-gray-600">The password was set by the administrator. The user can sign in with the new password immediately.</p>}
           <DialogFooter><Button className="bg-[#7A1F2B]" onClick={() => setResetInfo(null)}>Done</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -378,7 +403,7 @@ export default function UserManagement() {
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <Button size="sm" variant="outline" onClick={() => openRoles(detail.data?.user)} disabled={isSelf(detail.data?.user)}><ShieldCheck className="mr-2 h-4 w-4" />Assign roles</Button>
-                    <Button size="sm" variant="outline" onClick={() => resetPassword.mutate(detail.data?.user?.id)}><KeyRound className="mr-2 h-4 w-4" />Reset password</Button>
+                    <Button size="sm" variant="outline" onClick={() => { setResetTarget(detail.data?.user); setResetPasswordValue(''); }}><KeyRound className="mr-2 h-4 w-4" />Reset / Set password</Button>
                     <Button size="sm" variant="outline" onClick={() => revokeSessions.mutate(detail.data?.user?.id)}><LogOut className="mr-2 h-4 w-4" />Revoke sessions</Button>
                   </div>
                 </TabsContent>
