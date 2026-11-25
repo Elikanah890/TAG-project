@@ -1,0 +1,45 @@
+# Dependencies / builds
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# OS / editor / temp
+.DS_Store
+Thumbs.db
+*.log
+*.tsbuildinfo
+.playwright-mcp/
+.~lock.*
+*.swp
+
+# Local artifacts
+hero-after.png
+role-switcher.png
+mikopo_doc.html
+
+# Agent skills cache
+backend/.agents/
+
+backend/.claude/
+backend/.windsurf/
+
+# Local docs/media not for deploy
+Mikopo na Hisa System Documentation.pdf
+Site web d’église.jpeg
+TAG FOREST  YA  KWANZA.docx
+hero/
+leader/
+design/
+role-switcher.png
+hero-after.png
+mikopo_doc.html
+sadak acc.jpeg
