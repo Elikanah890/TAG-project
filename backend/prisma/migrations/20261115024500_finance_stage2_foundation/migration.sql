@@ -1,38 +1,56 @@
 -- CreateEnum
-CREATE TYPE "InvoiceStatus" AS ENUM ('DRAFT', 'ISSUED', 'SENT', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED');
+DO $$ BEGIN DO $$ BEGIN
+  CREATE TYPE "InvoiceStatus" AS ENUM ('DRAFT', 'ISSUED', 'SENT', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "FinancialAccountType" AS ENUM ('CASH', 'BANK', 'MOBILE_MONEY');
+DO $$ BEGIN
+  CREATE TYPE "FinancialAccountType" AS ENUM ('CASH', 'BANK', 'MOBILE_MONEY');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "ExpenseStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'REVERSED');
+DO $$ BEGIN
+  CREATE TYPE "ExpenseStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'REVERSED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "ExpenseApprovalAction" AS ENUM ('SUBMITTED', 'APPROVED', 'REJECTED', 'REVERSED');
+DO $$ BEGIN
+  CREATE TYPE "ExpenseApprovalAction" AS ENUM ('SUBMITTED', 'APPROVED', 'REJECTED', 'REVERSED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "WhatsAppMessageType" AS ENUM ('RECEIPT', 'INVOICE', 'REMINDER', 'OTHER');
+DO $$ BEGIN
+  CREATE TYPE "WhatsAppMessageType" AS ENUM ('RECEIPT', 'INVOICE', 'REMINDER', 'OTHER');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "WhatsAppMessageStatus" AS ENUM ('PENDING', 'OPENED', 'SENT', 'DELIVERED', 'READ', 'FAILED');
+DO $$ BEGIN
+  CREATE TYPE "WhatsAppMessageStatus" AS ENUM ('PENDING', 'OPENED', 'SENT', 'DELIVERED', 'READ', 'FAILED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AlterTable
-ALTER TABLE "Budget" ADD COLUMN     "campaignId" TEXT;
+ALTER TABLE "Budget" ADD COLUMN IF NOT EXISTS "campaignId" TEXT;
 
 -- AlterTable
 ALTER TABLE "Contribution" ADD COLUMN     "campaignId" TEXT,
-ADD COLUMN     "financialAccountId" TEXT,
-ADD COLUMN     "invoiceId" TEXT;
+ADD COLUMN IF NOT EXISTS "financialAccountId" TEXT,
+ADD COLUMN IF NOT EXISTS "invoiceId" TEXT;
 
 -- AlterTable
-ALTER TABLE "Expense" ADD COLUMN     "financialAccountId" TEXT,
-ADD COLUMN     "reviewNote" TEXT,
-ADD COLUMN     "reviewedAt" TIMESTAMP(3),
-ADD COLUMN     "reviewedById" TEXT,
-ADD COLUMN     "status" "ExpenseStatus" NOT NULL DEFAULT 'PENDING';
+ALTER TABLE "Expense" ADD COLUMN IF NOT EXISTS "financialAccountId" TEXT,
+ADD COLUMN IF NOT EXISTS "reviewNote" TEXT,
+ADD COLUMN IF NOT EXISTS "reviewedAt" TIMESTAMP(3),
+ADD COLUMN IF NOT EXISTS "reviewedById" TEXT,
+ADD COLUMN IF NOT EXISTS "status" "ExpenseStatus" NOT NULL DEFAULT 'PENDING';
 
 -- CreateTable
-CREATE TABLE "Campaign" (
+CREATE TABLE IF NOT EXISTS "Campaign" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
@@ -48,7 +66,7 @@ CREATE TABLE "Campaign" (
 );
 
 -- CreateTable
-CREATE TABLE "Invoice" (
+CREATE TABLE IF NOT EXISTS "Invoice" (
     "id" TEXT NOT NULL,
     "invoiceNo" TEXT NOT NULL,
     "status" "InvoiceStatus" NOT NULL DEFAULT 'DRAFT',
@@ -72,7 +90,7 @@ CREATE TABLE "Invoice" (
 );
 
 -- CreateTable
-CREATE TABLE "InvoiceItem" (
+CREATE TABLE IF NOT EXISTS "InvoiceItem" (
     "id" TEXT NOT NULL,
     "invoiceId" TEXT NOT NULL,
     "description" TEXT NOT NULL,
@@ -84,7 +102,7 @@ CREATE TABLE "InvoiceItem" (
 );
 
 -- CreateTable
-CREATE TABLE "FinancialAccount" (
+CREATE TABLE IF NOT EXISTS "FinancialAccount" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "type" "FinancialAccountType" NOT NULL,
@@ -101,7 +119,7 @@ CREATE TABLE "FinancialAccount" (
 );
 
 -- CreateTable
-CREATE TABLE "ExpenseApprovalHistory" (
+CREATE TABLE IF NOT EXISTS "ExpenseApprovalHistory" (
     "id" TEXT NOT NULL,
     "expenseId" TEXT NOT NULL,
     "actorId" TEXT,
@@ -115,7 +133,7 @@ CREATE TABLE "ExpenseApprovalHistory" (
 );
 
 -- CreateTable
-CREATE TABLE "WhatsAppMessageLog" (
+CREATE TABLE IF NOT EXISTS "WhatsAppMessageLog" (
     "id" TEXT NOT NULL,
     "memberId" TEXT,
     "contributionId" TEXT,
@@ -142,145 +160,196 @@ CREATE TABLE "WhatsAppMessageLog" (
 );
 
 -- CreateIndex
-CREATE INDEX "Campaign_status_idx" ON "Campaign"("status");
+CREATE INDEX IF NOT EXISTS "Campaign_status_idx" ON "Campaign"("status");
 
 -- CreateIndex
-CREATE INDEX "Campaign_startDate_idx" ON "Campaign"("startDate");
+CREATE INDEX IF NOT EXISTS "Campaign_startDate_idx" ON "Campaign"("startDate");
 
 -- CreateIndex
-CREATE INDEX "Campaign_endDate_idx" ON "Campaign"("endDate");
+CREATE INDEX IF NOT EXISTS "Campaign_endDate_idx" ON "Campaign"("endDate");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Invoice_invoiceNo_key" ON "Invoice"("invoiceNo");
+CREATE UNIQUE INDEX IF NOT EXISTS "Invoice_invoiceNo_key" ON "Invoice"("invoiceNo");
 
 -- CreateIndex
-CREATE INDEX "Invoice_status_idx" ON "Invoice"("status");
+CREATE INDEX IF NOT EXISTS "Invoice_status_idx" ON "Invoice"("status");
 
 -- CreateIndex
-CREATE INDEX "Invoice_memberId_idx" ON "Invoice"("memberId");
+CREATE INDEX IF NOT EXISTS "Invoice_memberId_idx" ON "Invoice"("memberId");
 
 -- CreateIndex
-CREATE INDEX "Invoice_campaignId_idx" ON "Invoice"("campaignId");
+CREATE INDEX IF NOT EXISTS "Invoice_campaignId_idx" ON "Invoice"("campaignId");
 
 -- CreateIndex
-CREATE INDEX "Invoice_issueDate_idx" ON "Invoice"("issueDate");
+CREATE INDEX IF NOT EXISTS "Invoice_issueDate_idx" ON "Invoice"("issueDate");
 
 -- CreateIndex
-CREATE INDEX "Invoice_dueDate_idx" ON "Invoice"("dueDate");
+CREATE INDEX IF NOT EXISTS "Invoice_dueDate_idx" ON "Invoice"("dueDate");
 
 -- CreateIndex
-CREATE INDEX "InvoiceItem_invoiceId_idx" ON "InvoiceItem"("invoiceId");
+CREATE INDEX IF NOT EXISTS "InvoiceItem_invoiceId_idx" ON "InvoiceItem"("invoiceId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "FinancialAccount_name_key" ON "FinancialAccount"("name");
+CREATE UNIQUE INDEX IF NOT EXISTS "FinancialAccount_name_key" ON "FinancialAccount"("name");
 
 -- CreateIndex
-CREATE INDEX "FinancialAccount_type_idx" ON "FinancialAccount"("type");
+CREATE INDEX IF NOT EXISTS "FinancialAccount_type_idx" ON "FinancialAccount"("type");
 
 -- CreateIndex
-CREATE INDEX "FinancialAccount_status_idx" ON "FinancialAccount"("status");
+CREATE INDEX IF NOT EXISTS "FinancialAccount_status_idx" ON "FinancialAccount"("status");
 
 -- CreateIndex
-CREATE INDEX "ExpenseApprovalHistory_expenseId_idx" ON "ExpenseApprovalHistory"("expenseId");
+CREATE INDEX IF NOT EXISTS "ExpenseApprovalHistory_expenseId_idx" ON "ExpenseApprovalHistory"("expenseId");
 
 -- CreateIndex
-CREATE INDEX "ExpenseApprovalHistory_actorId_idx" ON "ExpenseApprovalHistory"("actorId");
+CREATE INDEX IF NOT EXISTS "ExpenseApprovalHistory_actorId_idx" ON "ExpenseApprovalHistory"("actorId");
 
 -- CreateIndex
-CREATE INDEX "ExpenseApprovalHistory_createdAt_idx" ON "ExpenseApprovalHistory"("createdAt");
+CREATE INDEX IF NOT EXISTS "ExpenseApprovalHistory_createdAt_idx" ON "ExpenseApprovalHistory"("createdAt");
 
 -- CreateIndex
-CREATE INDEX "WhatsAppMessageLog_memberId_idx" ON "WhatsAppMessageLog"("memberId");
+CREATE INDEX IF NOT EXISTS "WhatsAppMessageLog_memberId_idx" ON "WhatsAppMessageLog"("memberId");
 
 -- CreateIndex
-CREATE INDEX "WhatsAppMessageLog_contributionId_idx" ON "WhatsAppMessageLog"("contributionId");
+CREATE INDEX IF NOT EXISTS "WhatsAppMessageLog_contributionId_idx" ON "WhatsAppMessageLog"("contributionId");
 
 -- CreateIndex
-CREATE INDEX "WhatsAppMessageLog_invoiceId_idx" ON "WhatsAppMessageLog"("invoiceId");
+CREATE INDEX IF NOT EXISTS "WhatsAppMessageLog_invoiceId_idx" ON "WhatsAppMessageLog"("invoiceId");
 
 -- CreateIndex
-CREATE INDEX "WhatsAppMessageLog_recipientPhone_idx" ON "WhatsAppMessageLog"("recipientPhone");
+CREATE INDEX IF NOT EXISTS "WhatsAppMessageLog_recipientPhone_idx" ON "WhatsAppMessageLog"("recipientPhone");
 
 -- CreateIndex
-CREATE INDEX "WhatsAppMessageLog_status_idx" ON "WhatsAppMessageLog"("status");
+CREATE INDEX IF NOT EXISTS "WhatsAppMessageLog_status_idx" ON "WhatsAppMessageLog"("status");
 
 -- CreateIndex
-CREATE INDEX "WhatsAppMessageLog_createdAt_idx" ON "WhatsAppMessageLog"("createdAt");
+CREATE INDEX IF NOT EXISTS "WhatsAppMessageLog_createdAt_idx" ON "WhatsAppMessageLog"("createdAt");
 
 -- CreateIndex
-CREATE INDEX "Budget_campaignId_idx" ON "Budget"("campaignId");
+CREATE INDEX IF NOT EXISTS "Budget_campaignId_idx" ON "Budget"("campaignId");
 
 -- CreateIndex
-CREATE INDEX "Contribution_invoiceId_idx" ON "Contribution"("invoiceId");
+CREATE INDEX IF NOT EXISTS "Contribution_invoiceId_idx" ON "Contribution"("invoiceId");
 
 -- CreateIndex
-CREATE INDEX "Contribution_campaignId_idx" ON "Contribution"("campaignId");
+CREATE INDEX IF NOT EXISTS "Contribution_campaignId_idx" ON "Contribution"("campaignId");
 
 -- CreateIndex
-CREATE INDEX "Contribution_financialAccountId_idx" ON "Contribution"("financialAccountId");
+CREATE INDEX IF NOT EXISTS "Contribution_financialAccountId_idx" ON "Contribution"("financialAccountId");
 
 -- CreateIndex
-CREATE INDEX "Expense_status_idx" ON "Expense"("status");
+CREATE INDEX IF NOT EXISTS "Expense_status_idx" ON "Expense"("status");
 
 -- CreateIndex
-CREATE INDEX "Expense_recordedById_idx" ON "Expense"("recordedById");
+CREATE INDEX IF NOT EXISTS "Expense_recordedById_idx" ON "Expense"("recordedById");
 
 -- CreateIndex
-CREATE INDEX "Expense_reviewedById_idx" ON "Expense"("reviewedById");
+CREATE INDEX IF NOT EXISTS "Expense_reviewedById_idx" ON "Expense"("reviewedById");
 
 -- CreateIndex
-CREATE INDEX "Expense_financialAccountId_idx" ON "Expense"("financialAccountId");
+CREATE INDEX IF NOT EXISTS "Expense_financialAccountId_idx" ON "Expense"("financialAccountId");
 
 -- AddForeignKey
-ALTER TABLE "Contribution" ADD CONSTRAINT "Contribution_invoiceId_fkey" FOREIGN KEY ("invoiceId") REFERENCES "Invoice"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Contribution" ADD CONSTRAINT "Contribution_invoiceId_fkey" FOREIGN KEY ("invoiceId") REFERENCES "Invoice"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Contribution" ADD CONSTRAINT "Contribution_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Contribution" ADD CONSTRAINT "Contribution_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Contribution" ADD CONSTRAINT "Contribution_financialAccountId_fkey" FOREIGN KEY ("financialAccountId") REFERENCES "FinancialAccount"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Contribution" ADD CONSTRAINT "Contribution_financialAccountId_fkey" FOREIGN KEY ("financialAccountId") REFERENCES "FinancialAccount"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Expense" ADD CONSTRAINT "Expense_recordedById_fkey" FOREIGN KEY ("recordedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Expense" ADD CONSTRAINT "Expense_recordedById_fkey" FOREIGN KEY ("recordedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Expense" ADD CONSTRAINT "Expense_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Expense" ADD CONSTRAINT "Expense_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Expense" ADD CONSTRAINT "Expense_financialAccountId_fkey" FOREIGN KEY ("financialAccountId") REFERENCES "FinancialAccount"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Expense" ADD CONSTRAINT "Expense_financialAccountId_fkey" FOREIGN KEY ("financialAccountId") REFERENCES "FinancialAccount"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Budget" ADD CONSTRAINT "Budget_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Budget" ADD CONSTRAINT "Budget_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "InvoiceItem" ADD CONSTRAINT "InvoiceItem_invoiceId_fkey" FOREIGN KEY ("invoiceId") REFERENCES "Invoice"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "InvoiceItem" ADD CONSTRAINT "InvoiceItem_invoiceId_fkey" FOREIGN KEY ("invoiceId") REFERENCES "Invoice"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "ExpenseApprovalHistory" ADD CONSTRAINT "ExpenseApprovalHistory_expenseId_fkey" FOREIGN KEY ("expenseId") REFERENCES "Expense"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "ExpenseApprovalHistory" ADD CONSTRAINT "ExpenseApprovalHistory_expenseId_fkey" FOREIGN KEY ("expenseId") REFERENCES "Expense"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "ExpenseApprovalHistory" ADD CONSTRAINT "ExpenseApprovalHistory_actorId_fkey" FOREIGN KEY ("actorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "ExpenseApprovalHistory" ADD CONSTRAINT "ExpenseApprovalHistory_actorId_fkey" FOREIGN KEY ("actorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "WhatsAppMessageLog" ADD CONSTRAINT "WhatsAppMessageLog_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "WhatsAppMessageLog" ADD CONSTRAINT "WhatsAppMessageLog_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "WhatsAppMessageLog" ADD CONSTRAINT "WhatsAppMessageLog_contributionId_fkey" FOREIGN KEY ("contributionId") REFERENCES "Contribution"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "WhatsAppMessageLog" ADD CONSTRAINT "WhatsAppMessageLog_contributionId_fkey" FOREIGN KEY ("contributionId") REFERENCES "Contribution"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "WhatsAppMessageLog" ADD CONSTRAINT "WhatsAppMessageLog_invoiceId_fkey" FOREIGN KEY ("invoiceId") REFERENCES "Invoice"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "WhatsAppMessageLog" ADD CONSTRAINT "WhatsAppMessageLog_invoiceId_fkey" FOREIGN KEY ("invoiceId") REFERENCES "Invoice"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "WhatsAppMessageLog" ADD CONSTRAINT "WhatsAppMessageLog_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "WhatsAppMessageLog" ADD CONSTRAINT "WhatsAppMessageLog_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Seed default financial accounts. Opening balances are intentionally zero.
 INSERT INTO "FinancialAccount" ("id", "name", "type", "provider", "currency", "openingBalance", "status", "createdAt", "updatedAt")
